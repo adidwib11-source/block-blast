@@ -1,28 +1,19 @@
-/* ==========================================================
-   NEON GRID: Block Fusion — style.css
-   Versi premium — neon, glassmorphism, micro-interactions.
-   ========================================================== */
-
 *,
 *::before,
 *::after { box-sizing: border-box; }
 
 :root {
-  --bg-deep: #04020c;
   --text: #ecebff;
   --muted: #8b84bd;
 
   --violet: #a855f7;
-  --violet-2: #7c3aed;
   --violet-soft: #c4b5fd;
   --cyan: #22d3ee;
-  --cyan-soft: #a5f3fc;
   --pink: #ec4899;
   --blue: #3b82f6;
   --green: #34d399;
   --amber: #fbbf24;
 
-  --panel: rgba(18, 12, 42, 0.82);
   --brd: rgba(139, 92, 246, 0.26);
   --brd-strong: rgba(167, 139, 250, 0.65);
 
@@ -31,7 +22,8 @@
   --radius-sm: 10px;
 
   --cell-gap: clamp(3px, 0.9vw, 5px);
-  --sc: clamp(10px, 3.2vw, 17px);
+  --sc: clamp(11px, 3.4vw, 18px);
+  --sc-fallback: 14px;
 
   --font: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
 
@@ -64,7 +56,6 @@ body {
   -webkit-user-select: none;
 }
 
-/* ---------- CANVAS PARTIKEL & FLASH ---------- */
 .particle-canvas {
   position: fixed;
   inset: 0;
@@ -85,7 +76,6 @@ body {
   transition: opacity 0.55s ease-out;
 }
 
-/* ---------- APP LAYOUT ---------- */
 .app {
   position: relative;
   z-index: 2;
@@ -98,7 +88,6 @@ body {
   gap: 10px;
 }
 
-/* ---------- TOP BAR ---------- */
 .topbar {
   display: flex;
   align-items: center;
@@ -202,7 +191,6 @@ body {
 .icon-btn:active { transform: scale(0.9); }
 .icon-btn.muted { color: var(--muted); }
 
-/* ---------- HUD ---------- */
 .hud {
   display: flex;
   align-items: center;
@@ -214,8 +202,7 @@ body {
   border: 1px solid var(--brd);
   box-shadow:
     0 8px 26px rgba(0, 0, 0, 0.38),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 0 0 1px rgba(139, 92, 246, 0.06);
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
   position: relative;
   overflow: hidden;
 }
@@ -320,7 +307,6 @@ body {
   transition: width 0.3s var(--ease-out);
 }
 
-/* ---------- ENERGY ---------- */
 .energy-wrap {
   display: flex;
   align-items: center;
@@ -370,8 +356,7 @@ body {
   pointer-events: none;
 }
 
-.energy-fill.full + .energy-shine,
-.energy-track:has(.energy-fill.full) .energy-shine {
+.energy-fill.full ~ .energy-shine {
   opacity: 1;
   animation: energySweep 1.6s linear infinite;
 }
@@ -402,7 +387,6 @@ body {
 
 .energy-pct.full { color: var(--cyan); text-shadow: 0 0 8px rgba(34, 211, 238, 0.8); }
 
-/* ---------- BOARD ---------- */
 .board-wrap {
   position: relative;
   width: min(92vw, 440px, 44vh);
@@ -464,7 +448,6 @@ body {
   transition: background 0.14s ease, box-shadow 0.14s ease, transform 0.12s var(--ease-pop);
 }
 
-/* --- warna blok --- */
 .c-cyan   { --c1: #a5f3fc; --c2: #22d3ee; --c3: #0e7490; }
 .c-violet { --c1: #ddd6fe; --c2: #a855f7; --c3: #6b21a8; }
 .c-pink   { --c1: #fbcfe8; --c2: #ec4899; --c3: #9d174d; }
@@ -473,8 +456,7 @@ body {
 .c-amber  { --c1: #fde68a; --c2: #fbbf24; --c3: #b45309; }
 
 .cell.filled {
-  background:
-    linear-gradient(150deg, var(--c1) 0%, var(--c2) 42%, var(--c3) 100%);
+  background: linear-gradient(150deg, var(--c1) 0%, var(--c2) 42%, var(--c3) 100%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.55),
     inset 0 -2px 5px rgba(0, 0, 0, 0.42),
@@ -513,7 +495,6 @@ body {
   }
 }
 
-/* --- preview --- */
 .cell.preview-ok {
   background: rgba(34, 211, 238, 0.28);
   box-shadow:
@@ -541,10 +522,7 @@ body {
   to { background: rgba(244, 63, 94, 0.34); }
 }
 
-/* --- animasi --- */
-.cell.placed {
-  animation: popIn 0.24s var(--ease-pop);
-}
+.cell.placed { animation: popIn 0.24s var(--ease-pop); }
 
 @keyframes popIn {
   0% { transform: scale(0.25); opacity: 0.4; filter: brightness(1.8); }
@@ -574,7 +552,6 @@ body {
   80% { transform: translateX(-2px); }
 }
 
-/* ---------- COMBO TOAST ---------- */
 .combo-toast {
   position: absolute;
   top: 50%;
@@ -594,9 +571,7 @@ body {
   z-index: 8;
 }
 
-.combo-toast.show {
-  animation: toastPop 0.95s var(--ease-out) forwards;
-}
+.combo-toast.show { animation: toastPop 0.95s var(--ease-out) forwards; }
 
 .combo-toast.undo {
   font-size: clamp(16px, 5vw, 22px);
@@ -612,7 +587,6 @@ body {
   100% { opacity: 0; transform: translate(-50%, -95%) scale(0.94); }
 }
 
-/* ---------- SCORE POPUP ---------- */
 .score-popup {
   position: fixed;
   z-index: 460;
@@ -637,13 +611,11 @@ body {
   100% { opacity: 0; transform: translate(-50%, -190%) scale(0.96); }
 }
 
-/* ---------- TRAY ---------- */
 .tray {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 9px;
   width: 100%;
-  --sc: clamp(10px, 3.2vw, 17px);
 }
 
 .tray-slot {
@@ -651,8 +623,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: clamp(66px, 17.5vw, 88px);
-  padding: 7px;
+  min-height: clamp(70px, 18vw, 92px);
+  padding: 8px;
   border-radius: var(--radius-md);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.015));
@@ -701,17 +673,17 @@ body {
 .shape-grid {
   display: grid;
   gap: 3px;
-  animation: shapeIn 0.3s var(--ease-pop);
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
-}
-
-@keyframes shapeIn {
-  from { transform: scale(0.6); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  width: max-content;
+  grid-auto-rows: var(--sc, 14px);
 }
 
 .shape-cell {
+  width: var(--sc, 14px);
+  height: var(--sc, 14px);
+  min-width: 6px;
+  min-height: 6px;
   border-radius: clamp(3px, 0.9vw, 5px);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .shape-cell.on {
@@ -727,7 +699,6 @@ body {
   box-shadow: 0 0 12px rgba(244, 114, 182, 0.9);
 }
 
-/* ---------- CONTROLS ---------- */
 .controls {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -799,5 +770,43 @@ body {
   box-shadow: 0 0 26px rgba(34, 211, 238, 0.55);
 }
 
-/* ---------- HINT ---------- */
-.
+.hint {
+  margin: 0;
+  text-align: center;
+  font-size: 10.5px;
+  line-height: 1.45;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+  padding: 0 6px;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(4, 2, 12, 0.78);
+  backdrop-filter: blur(10px) saturate(1.1);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  animation: fadeIn 0.26s ease;
+}
+
+.overlay.hidden { display: none; }
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.overlay-card {
+  position: relative;
+  width: 100%;
+  max-width: 340px;
+  padding: 24px 22px;
+  border-radius: 24px;
+  background: linear-gradient(160deg, rgba(46, 26, 100, 0.94), rgba(12, 8, 30, 0.97));
+  border: 1px solid rgba(139, 92, 246, 0.45);
+  box-shadow:
+    0 0 70px rgba(124, 58, 237, 0.5),
+    0 24px 64px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08

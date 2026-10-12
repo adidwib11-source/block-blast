@@ -1,15 +1,5 @@
-/* ==========================================================
-   NEON GRID: Block Fusion — script.js
-   Game puzzle blok neon dengan combo, fusion block, energy,
-   daily challenge, undo, partikel, dan penyimpanan skor.
-   ========================================================== */
-
 (function () {
   'use strict';
-
-  /* ==========================================================
-     1. KONSTANTA
-     ========================================================== */
 
   const BOARD_SIZE = 8;
   const MAX_ENERGY = 100;
@@ -23,58 +13,45 @@
   const COLORS = ['cyan', 'violet', 'pink', 'blue', 'green', 'amber'];
 
   const COLOR_HEX = {
-    cyan:   '#22d3ee',
+    cyan: '#22d3ee',
     violet: '#a855f7',
-    pink:   '#ec4899',
-    blue:   '#3b82f6',
-    green:  '#34d399',
-    amber:  '#fbbf24'
+    pink: '#ec4899',
+    blue: '#3b82f6',
+    green: '#34d399',
+    amber: '#fbbf24'
   };
 
   const SHAPE_DEFS = [
     { id: 'dot',  weight: 3, cells: [[0, 0]] },
-
     { id: 'h2',   weight: 9, cells: [[0, 0], [0, 1]] },
     { id: 'v2',   weight: 9, cells: [[0, 0], [1, 0]] },
-
     { id: 'h3',   weight: 7, cells: [[0, 0], [0, 1], [0, 2]] },
     { id: 'v3',   weight: 7, cells: [[0, 0], [1, 0], [2, 0]] },
-
     { id: 'h4',   weight: 4, cells: [[0, 0], [0, 1], [0, 2], [0, 3]] },
     { id: 'v4',   weight: 4, cells: [[0, 0], [1, 0], [2, 0], [3, 0]] },
-
     { id: 'h5',   weight: 2, cells: [[0, 0], [0, 1], [0, 2], [0, 3], [0, 4]] },
     { id: 'v5',   weight: 2, cells: [[0, 0], [1, 0], [2, 0], [3, 0], [4, 0]] },
-
     { id: 'sq2',  weight: 8, cells: [[0, 0], [0, 1], [1, 0], [1, 1]] },
     { id: 'sq3',  weight: 1, cells: [
       [0, 0], [0, 1], [0, 2],
       [1, 0], [1, 1], [1, 2],
       [2, 0], [2, 1], [2, 2]
     ] },
-
     { id: 'cnr1', weight: 8, cells: [[0, 0], [1, 0], [1, 1]] },
     { id: 'cnr2', weight: 8, cells: [[0, 0], [0, 1], [1, 0]] },
     { id: 'cnr3', weight: 8, cells: [[0, 0], [0, 1], [1, 1]] },
     { id: 'cnr4', weight: 8, cells: [[0, 1], [1, 0], [1, 1]] },
-
     { id: 'bigL1', weight: 3, cells: [[0, 0], [1, 0], [2, 0], [2, 1]] },
     { id: 'bigL2', weight: 3, cells: [[0, 0], [0, 1], [0, 2], [1, 0]] },
     { id: 'bigL3', weight: 3, cells: [[0, 0], [0, 1], [1, 1], [2, 1]] },
     { id: 'bigL4', weight: 3, cells: [[0, 2], [1, 0], [1, 1], [1, 2]] },
-
     { id: 't1',   weight: 3, cells: [[0, 0], [0, 1], [0, 2], [1, 1]] },
     { id: 't2',   weight: 3, cells: [[0, 1], [1, 0], [1, 1], [1, 2]] },
     { id: 't3',   weight: 3, cells: [[0, 0], [1, 0], [1, 1], [2, 0]] },
     { id: 't4',   weight: 3, cells: [[0, 1], [1, 0], [1, 1], [2, 1]] },
-
     { id: 's1',   weight: 3, cells: [[0, 1], [0, 2], [1, 0], [1, 1]] },
     { id: 's2',   weight: 3, cells: [[0, 0], [0, 1], [1, 1], [1, 2]] }
   ];
-
-  /* ==========================================================
-     2. UTILITAS
-     ========================================================== */
 
   function $(id) { return document.getElementById(id); }
   function fmt(n) { return Math.round(n).toLocaleString('id-ID'); }
@@ -88,7 +65,7 @@
   }
 
   function lsSet(key, value) {
-    try { window.localStorage.setItem(key, String(value)); } catch (e) { /* noop */ }
+    try { window.localStorage.setItem(key, String(value)); } catch (e) {}
   }
 
   function normalizeShape(cells) {
@@ -129,10 +106,6 @@
 
   const TOTAL_WEIGHT = SHAPES.reduce(function (s, sh) { return s + sh.weight; }, 0);
 
-  /* ==========================================================
-     3. STATE
-     ========================================================== */
-
   let board = [];
   let cellEls = [];
   let tray = [];
@@ -158,10 +131,6 @@
 
   let scoreAnimRaf = null;
   let toastTimer = null;
-
-  /* ==========================================================
-     4. DOM
-     ========================================================== */
 
   const boardEl = $('board');
   const trayEl = $('tray');
@@ -205,9 +174,8 @@
   const particleCanvas = $('particleCanvas');
   const pctx = particleCanvas.getContext('2d');
 
-  /* ==========================================================
-     5. PARTIKEL
-     ========================================================== */
+  let activeOverlay = null;
+  let overlayQueue = null;
 
   let particles = [];
   let particleRaf = null;
@@ -284,10 +252,6 @@
     spawnBurst(rect.left + rect.width / 2, rect.top + rect.height / 2, color, count);
   }
 
-  /* ==========================================================
-     6. FLASH & SCORE POPUP
-     ========================================================== */
-
   function flashScreen(intensity) {
     flashEl.style.transition = 'none';
     flashEl.style.opacity = String(clamp(intensity || 0.16, 0, 0.5));
@@ -321,10 +285,6 @@
     spawnScorePopup(sx / cells.length, sy / cells.length, amount, '#c4b5fd');
   }
 
-  /* ==========================================================
-     7. AUDIO
-     ========================================================== */
-
   let audioCtx = null;
 
   function getAudioCtx() {
@@ -334,7 +294,7 @@
       try { audioCtx = new AC(); } catch (e) { return null; }
     }
     if (audioCtx.state === 'suspended') {
-      audioCtx.resume().catch(function () { /* noop */ });
+      audioCtx.resume().catch(function () {});
     }
     return audioCtx;
   }
@@ -399,10 +359,6 @@
     }
   }
 
-  /* ==========================================================
-     8. PAPAN — LOGIKA
-     ========================================================== */
-
   function createEmptyBoard() {
     const b = [];
     for (let r = 0; r < BOARD_SIZE; r++) {
@@ -460,10 +416,6 @@
     return false;
   }
 
-  /* ==========================================================
-     9. GENERASI BENTUK
-     ========================================================== */
-
   function pickShape() {
     let r = rng() * TOTAL_WEIGHT;
     for (let i = 0; i < SHAPES.length; i++) {
@@ -501,10 +453,6 @@
     return items;
   }
 
-  /* ==========================================================
-     10. RENDER PAPAN
-     ========================================================== */
-
   function buildBoardDOM() {
     boardEl.innerHTML = '';
     cellEls = [];
@@ -528,9 +476,7 @@
   function renderCell(r, c) {
     const el = cellEls[r][c];
     const cell = board[r][c];
-
     el.className = 'cell';
-
     if (cell) {
       el.classList.add('filled', 'c-' + cell.color);
       if (cell.fusion) el.classList.add('fusion');
@@ -579,15 +525,11 @@
     }
   }
 
-  /* ==========================================================
-     11. RENDER TRAY
-     ========================================================== */
-
   function buildShapeGrid(shape, color, fusion) {
     const grid = document.createElement('div');
     grid.className = 'shape-grid';
-    grid.style.gridTemplateColumns = 'repeat(' + shape.w + ', var(--sc))';
-    grid.style.gridTemplateRows = 'repeat(' + shape.h + ', var(--sc))';
+    grid.style.gridTemplateColumns = 'repeat(' + shape.w + ', var(--sc, 14px))';
+    grid.style.gridTemplateRows = 'repeat(' + shape.h + ', var(--sc, 14px))';
 
     const filled = {};
     for (let i = 0; i < shape.cells.length; i++) {
@@ -637,10 +579,6 @@
     }
   }
 
-  /* ==========================================================
-     12. HUD
-     ========================================================== */
-
   function updateHud() {
     if (!scoreAnimRaf) scoreValueEl.textContent = fmt(displayedScore);
     bestValueEl.textContent = fmt(best);
@@ -658,4 +596,77 @@
 
     const canBlast = energy >= MAX_ENERGY && !gameOver && !busy;
     energyBtn.disabled = !canBlast;
-    energyBtn.classList.toggle('ready', energy >= MAX_ENERGY && !gameOve
+    energyBtn.classList.toggle('ready', energy >= MAX_ENERGY && !gameOver);
+    energyBtn.classList.toggle('active', energyMode);
+
+    undoBtn.disabled = undoUsed || !undoSnapshot || gameOver || busy;
+    restartBtn.disabled = busy;
+
+    modeChipEl.textContent = mode === 'daily' ? 'DAILY' : 'CLASSIC';
+    modeChipEl.classList.toggle('daily', mode === 'daily');
+
+    boardEl.classList.toggle('energy-mode', energyMode);
+  }
+
+  function animateScoreTo(to, from) {
+    if (scoreAnimRaf) cancelAnimationFrame(scoreAnimRaf);
+
+    const dur = 340;
+    const startTime = performance.now();
+
+    scoreValueEl.classList.remove('bump');
+    void scoreValueEl.offsetWidth;
+    scoreValueEl.classList.add('bump');
+
+    function step(now) {
+      const t = Math.min(1, (now - startTime) / dur);
+      const eased = 1 - Math.pow(1 - t, 3);
+      displayedScore = from + (to - from) * eased;
+      scoreValueEl.textContent = fmt(displayedScore);
+
+      if (t < 1) {
+        scoreAnimRaf = requestAnimationFrame(step);
+      } else {
+        displayedScore = to;
+        scoreValueEl.textContent = fmt(to);
+        scoreAnimRaf = null;
+      }
+    }
+    scoreAnimRaf = requestAnimationFrame(step);
+  }
+
+  function addScore(amount) {
+    if (amount <= 0) return;
+    const from = displayedScore;
+    score += amount;
+
+    if (score > best) {
+      best = score;
+      lsSet(LS_BEST, best);
+    }
+
+    animateScoreTo(score, from);
+    updateHud();
+    checkDailyComplete();
+  }
+
+  function showToast(text, variant) {
+    toastEl.textContent = text;
+    toastEl.className = 'combo-toast';
+    void toastEl.offsetWidth;
+    toastEl.classList.add('show');
+    if (variant) toastEl.classList.add(variant);
+
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () {
+      toastEl.className = 'combo-toast';
+    }, 1000);
+  }
+
+  function showComboToast(comboCount) {
+    const labels = ['', 'NICE!', 'GREAT!', 'AWESOME!', 'BLAZING!', 'UNSTOPPABLE!'];
+    const label = labels[clamp(comboCount, 0, labels.length - 1)] || 'UNSTOPPABLE!';
+    showToast(comboCount > 1 ? label + ' x' + comboCount : label, '');
+  }
+
+  function setSelect
